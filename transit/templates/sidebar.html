@@ -1,0 +1,181 @@
+{% load static %}
+
+<aside id="sidebar-container" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-slate-200 bg-white text-slate-700 transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-350 lg:static lg:translate-x-0">
+    <!-- Brand / Header -->
+    <div class="flex h-16 items-center justify-between px-6 border-b border-slate-100 dark:border-slate-850">
+        <a href="{% if request.user.profile.role == 'Admin' %}{% url 'admin_dashboard' %}{% elif request.user.profile.role == 'Fleet Manager' %}{% url 'fleet_manager_dashboard' %}{% elif request.user.profile.role == 'Dispatcher' %}{% url 'dispatcher_dashboard' %}{% elif request.user.profile.role == 'Safety Officer' %}{% url 'safety_dashboard' %}{% elif request.user.profile.role == 'Financial Analyst' %}{% url 'finance_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}" class="flex items-center gap-2">
+            <i class="fa-solid fa-truck-fast text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold tracking-tight text-slate-850 dark:text-white">TransitOps</span>
+        </a>
+        <button id="sidebar-close" class="rounded-lg p-1.5 text-slate-450 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white lg:hidden">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="flex-1 space-y-1 px-4 py-6 overflow-y-auto">
+        {% if request.user.profile.role == 'Admin' %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Admin Panel</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'admin_dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-chart-line text-lg"></i> Admin Dashboard
+                </a>
+                <a href="{% url 'admin_user_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'admin_user_list' or 'user' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-users text-lg"></i> User Management
+                </a>
+                <a href="{% url 'admin_role_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'admin_role_list' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-user-tag text-lg"></i> Role Management
+                </a>
+            </div>
+        </div>
+        {% elif request.user.profile.role == 'Fleet Manager' %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Core</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'fleet_manager_dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'fleet_manager_dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-chart-pie text-lg"></i> Dashboard
+                </a>
+            </div>
+        </div>
+        {% elif request.user.profile.role == 'Dispatcher' %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Core</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'dispatcher_dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'dispatcher_dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-chart-pie text-lg"></i> Dashboard
+                </a>
+                <a href="{% url 'dispatcher_trip_create' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'dispatcher_trip_create' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-route text-lg"></i> Trips
+                </a>
+                <a href="{% url 'profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'profile' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-regular fa-circle-user text-lg"></i> Profile
+                </a>
+            </div>
+        </div>
+        {% elif request.user.profile.role == 'Safety Officer' %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Safety Control</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'safety_dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'safety_dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-shield-halved text-lg"></i> Dashboard
+                </a>
+                <a href="{% url 'profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'profile' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-regular fa-circle-user text-lg"></i> Profile
+                </a>
+            </div>
+        </div>
+        {% elif request.user.profile.role == 'Financial Analyst' %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Finance Control</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'finance_dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'finance_dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-wallet text-lg"></i> Dashboard
+                </a>
+                <a href="{% url 'export_finance_csv' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white">
+                    <i class="fa-solid fa-file-csv text-lg text-emerald-500"></i> Export CSV
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div>
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500">Core</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if request.resolver_match.url_name == 'dashboard' %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-chart-pie text-lg"></i> Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if request.user.profile.role != 'Dispatcher' and request.user.profile.role != 'Safety Officer' and request.user.profile.role != 'Financial Analyst' %}
+        <div class="pt-6">
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500 font-bold">Fleet Management</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'vehicle_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'vehicle' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-truck text-lg"></i> Vehicles
+                </a>
+                {% if request.user.profile.role != 'Fleet Manager' %}
+                <a href="{% url 'driver_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'driver' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-id-card text-lg"></i> Drivers
+                </a>
+                <a href="{% url 'trip_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'trip' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-route text-lg"></i> Trips
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-6">
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500 font-bold">Operations Log</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'maintenance_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'maintenance' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-screwdriver-wrench text-lg"></i> Maintenance
+                </a>
+                {% if request.user.profile.role != 'Fleet Manager' %}
+                <a href="{% url 'fuel_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'fuel' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-gas-pump text-lg"></i> Fuel Logs
+                </a>
+                <a href="{% url 'expense_list' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'expense' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-wallet text-lg"></i> Expenses
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-6">
+            <span class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-450 dark:text-slate-500 font-bold">Analytics</span>
+            <div class="mt-2 space-y-1">
+                <a href="{% url 'reports_home' %}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors 
+                    {% if 'report' in request.resolver_match.url_name %} bg-blue-600 text-white {% else %} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white {% endif %}">
+                    <i class="fa-solid fa-chart-pie text-lg"></i> Reports
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Bottom Actions / Logged In User Info -->
+    <div class="border-t border-slate-100 dark:border-slate-850 p-4">
+        {% if request.user.profile.role != 'Fleet Manager' and request.user.profile.role != 'Dispatcher' and request.user.profile.role != 'Safety Officer' and request.user.profile.role != 'Financial Analyst' %}
+        <a href="{% url 'settings' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white mb-1">
+            <i class="fa-solid fa-gear text-lg"></i> Settings
+        </a>
+        {% endif %}
+        {% if request.user.profile.role != 'Dispatcher' and request.user.profile.role != 'Safety Officer' and request.user.profile.role != 'Financial Analyst' %}
+        <a href="{% url 'profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white mb-1">
+            <i class="fa-regular fa-circle-user text-lg"></i> Profile
+        </a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-300 font-semibold">
+            <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<script>
+    const sidebarClose = document.getElementById('sidebar-close');
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (sidebarClose && sidebarContainer) {
+        sidebarClose.addEventListener('click', () => {
+            sidebarContainer.classList.add('-translate-x-full');
+        });
+    }
+</script>

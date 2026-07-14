@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Trip #{{ trip.trip_number }} - TransitOps{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'dispatcher_dashboard' %}" class="hover:text-blue-500 transition-colors"><i class="fa-solid fa-house"></i> Home</a>
+    <span>&rsaquo;</span>
+    <span class="text-slate-400">Trips</span>
+    <span>&rsaquo;</span>
+    <span class="font-semibold text-slate-700 dark:text-slate-200">Complete Trip</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto font-sans">
+    <!-- Info Banner Card -->
+    <div class="mb-6 rounded-2xl border border-blue-550/20 bg-blue-500/10 p-5 shadow-xl backdrop-blur-md">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-2"><i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>Trip Details Summary</h2>
+        <div class="grid grid-cols-2 gap-4 text-xs">
+            <div>
+                <span class="text-slate-450 uppercase block font-semibold tracking-wider">Trip ID</span>
+                <span class="text-slate-900 dark:text-slate-200 font-bold text-sm">{{ trip.trip_number }}</span>
+            </div>
+            <div>
+                <span class="text-slate-450 uppercase block font-semibold tracking-wider">Route</span>
+                <span class="text-slate-900 dark:text-slate-200 font-bold text-sm">{{ trip.source }} &rarr; {{ trip.destination }}</span>
+            </div>
+            <div>
+                <span class="text-slate-450 uppercase block font-semibold tracking-wider">Vehicle</span>
+                <span class="text-slate-900 dark:text-slate-200 font-bold text-sm">{{ trip.vehicle.registration_number }} ({{ trip.vehicle.name }})</span>
+            </div>
+            <div>
+                <span class="text-slate-450 uppercase block font-semibold tracking-wider">Driver Assigned</span>
+                <span class="text-slate-900 dark:text-slate-200 font-bold text-sm">{{ trip.driver.name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Form Card -->
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-6 shadow-xl backdrop-blur-md">
+        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white mb-1"><i class="fa-solid fa-flag-checkered text-emerald-500 mr-2"></i>Complete Active Trip</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-450 mb-6">Enter final mileage readings and fuel consumption log to release the vehicle and driver back to the active fleet registry.</p>
+
+        <form method="POST" id="complete-trip-form" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Final Odometer -->
+            <div>
+                <label for="final_odometer" class="block text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider mb-2">Final Odometer Reading (km)</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-450">
+                        <i class="fa-solid fa-gauge"></i>
+                    </span>
+                    <input type="number" step="0.1" name="final_odometer" id="final_odometer" required
+                           class="w-full rounded-xl border border-slate-250 bg-white/40 pl-10 pr-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-white"
+                           placeholder="Current Odometer: {{ trip.vehicle.current_odometer }} km">
+                </div>
+                <span class="text-[10px] text-amber-500 mt-1.5 block font-medium" id="odo-warning" style="display: none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Warning: Final odometer must be at least {{ trip.vehicle.current_odometer }} km.
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Fuel Used -->
+                <div>
+                    <label for="fuel_used" class="block text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider mb-2">Fuel Used (Liters)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-450">
+                            <i class="fa-solid fa-gas-pump"></i>
+                        </span>
+                        <input type="number" step="0.01" name="fuel_used" id="fuel_used" required
+                               class="w-full rounded-xl border border-slate-250 bg-white/40 pl-10 pr-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-white"
+                               placeholder="e.g. 45.50">
+                    </div>
+                </div>
+
+                <!-- Fuel Cost -->
+                <div>
+                    <label for="fuel_cost" class="block text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider mb-2">Fuel Cost (INR)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-450">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        </span>
+                        <input type="number" step="0.01" name="fuel_cost" id="fuel_cost" required
+                               class="w-full rounded-xl border border-slate-250 bg-white/40 pl-10 pr-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-white"
+                               placeholder="e.g. 4500.00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fuel Station -->
+            <div>
+                <label for="fuel_station" class="block text-xs font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider mb-2">Fuel Station Location</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-450">
+                        <i class="fa-solid fa-map-pin"></i>
+                    </span>
+                    <input type="text" name="fuel_station" id="fuel_station" value="HP Fuel Station" required
+                           class="w-full rounded-xl border border-slate-250 bg-white/40 pl-10 pr-4 py-2.5 text-sm outline-none transition-all focus:border-blue-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-white"
+                           placeholder="HP / IndianOil Station Location">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-850">
+                <a href="{% url 'dispatcher_dashboard' %}" class="rounded-xl border border-slate-250 px-4 py-2.5 text-xs font-bold text-slate-650 hover:bg-slate-100 transition-all dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-850">Cancel</a>
+                <button type="submit" id="submit-btn" class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-555 transition-all">
+                    Complete & Release Fleet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentOdometer = parseFloat("{{ trip.vehicle.current_odometer }}");
+        const odoInput = document.getElementById("final_odometer");
+        const warning = document.getElementById("odo-warning");
+        const submitBtn = document.getElementById("submit-btn");
+
+        odoInput.addEventListener("input", function() {
+            const val = parseFloat(odoInput.value);
+            if (!isNaN(val) && val < currentOdometer) {
+                warning.style.display = "block";
+                submitBtn.disabled = true;
+                submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+            } else {
+                warning.style.display = "none";
+                submitBtn.disabled = false;
+                submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

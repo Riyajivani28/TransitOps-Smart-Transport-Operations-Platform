@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Finance Control Dashboard - TransitOps{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-500 font-bold">Financial Analysis</span>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">Finance & Cost Dashboard</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Track company operational costs, fuel transactions, maintenance logs, and vehicle efficiency reports.</p>
+        </div>
+        <div>
+            <a href="{% url 'export_finance_csv' %}" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <i class="fa-solid fa-file-csv text-lg"></i> Export CSV Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Overview Metrics (Compliance / Finance report cards) -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Card 1: Total Operational Cost -->
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-955/30 dark:text-blue-400">
+                    <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-slate-400">Total Operational Cost</p>
+                    <h3 class="text-2xl font-bold text-slate-850 dark:text-white">₹{{ total_operational_cost }}</h3>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+        </div>
+
+        <!-- Card 2: Fuel Expense -->
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-955/30 dark:text-amber-450">
+                    <i class="fa-solid fa-gas-pump text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-slate-400">Fuel Expenditure</p>
+                    <h3 class="text-2xl font-bold text-slate-850 dark:text-white">₹{{ total_fuel_cost }}</h3>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+
+        <!-- Card 3: Maintenance Cost -->
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-955/30 dark:text-rose-400">
+                    <i class="fa-solid fa-screwdriver-wrench text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-slate-400">Maintenance Cost</p>
+                    <h3 class="text-2xl font-bold text-slate-850 dark:text-white">₹{{ total_maintenance_cost }}</h3>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+        </div>
+
+        <!-- Card 4: Fuel Efficiency -->
+        <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-955/30 dark:text-emerald-400">
+                    <i class="fa-solid fa-gauge-high text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-slate-400">Avg Fuel Efficiency</p>
+                    <h3 class="text-2xl font-bold text-slate-850 dark:text-white">{{ avg_fuel_efficiency }} <span class="text-sm font-normal text-slate-450 dark:text-slate-500">km/L</span></h3>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+    </div>
+
+    <!-- Vehicle ROI Analysis -->
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="border-b border-slate-100 p-5 dark:border-slate-800">
+            <h2 class="text-lg font-bold text-slate-850 dark:text-white">Vehicle ROI & Cost Utilization</h2>
+            <p class="text-xs text-slate-450 dark:text-slate-500">Compare vehicle procurement metrics with ongoing operating expenses to analyze Return on Investment (ROI).</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-sm text-slate-600 dark:text-slate-400">
+                <thead class="bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/60 dark:text-slate-450">
+                    <tr>
+                        <th class="px-6 py-4">Vehicle registration</th>
+                        <th class="px-6 py-4">Acquisition Cost</th>
+                        <th class="px-6 py-4">Operating Cost</th>
+                        <th class="px-6 py-4">Trips Done</th>
+                        <th class="px-6 py-4">Simulated Revenue</th>
+                        <th class="px-6 py-4 text-right">ROI Rank</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-850">
+                    {% for item in vehicle_roi_data %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-850/30 transition-colors">
+                        <td class="px-6 py-4 font-semibold text-slate-850 dark:text-white">
+                            {{ item.vehicle.name }}
+                            <div class="text-xs font-normal text-slate-450 dark:text-slate-500">{{ item.vehicle.registration_number }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-800 dark:text-slate-300">₹{{ item.vehicle.acquisition_cost }}</td>
+                        <td class="px-6 py-4 text-rose-600 dark:text-rose-400">₹{{ item.op_cost }}</td>
+                        <td class="px-6 py-4 font-medium text-slate-850 dark:text-white">{{ item.completed_trips }}</td>
+                        <td class="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-medium">₹{{ item.revenue }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold
+                                {% if item.roi_percentage > 5 %} bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400
+                                {% elif item.roi_percentage >= 0 %} bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400
+                                {% else %} bg-rose-50 text-rose-700 dark:bg-rose-955/20 dark:text-rose-400
+                                {% endif %}">
+                                {{ item.roi_percentage }}% ROI
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-slate-400">No vehicles in registry.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Fuel Logs & Expenses Lists -->
+    <div class="grid gap-6 lg:grid-cols-2">
+        <!-- Fuel Logs Card -->
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="border-b border-slate-100 p-5 dark:border-slate-800 flex items-center justify-between">
+                <h2 class="text-base font-bold text-slate-850 dark:text-white">Recent Fuel Logs</h2>
+                <i class="fa-solid fa-gas-pump text-slate-400"></i>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left text-xs text-slate-600 dark:text-slate-400">
+                    <thead class="bg-slate-50/70 font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/60 dark:text-slate-450">
+                        <tr>
+                            <th class="px-4 py-3">Vehicle</th>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Liters</th>
+                            <th class="px-4 py-3">Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-850">
+                        {% for log in fuel_logs %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-850/30">
+                            <td class="px-4 py-3 font-semibold text-slate-800 dark:text-slate-350">{{ log.vehicle.registration_number }}</td>
+                            <td class="px-4 py-3">{{ log.fuel_date }}</td>
+                            <td class="px-4 py-3">{{ log.liters }}L</td>
+                            <td class="px-4 py-3 text-slate-900 dark:text-white font-medium">₹{{ log.cost }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-4 py-6 text-center text-slate-400">No fuel records logged.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Expenses Card -->
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="border-b border-slate-100 p-5 dark:border-slate-800 flex items-center justify-between">
+                <h2 class="text-base font-bold text-slate-850 dark:text-white">Recent Expenses</h2>
+                <i class="fa-solid fa-coins text-slate-400"></i>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left text-xs text-slate-600 dark:text-slate-400">
+                    <thead class="bg-slate-50/70 font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/60 dark:text-slate-450">
+                        <tr>
+                            <th class="px-4 py-3">Expense Type</th>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Target</th>
+                            <th class="px-4 py-3">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-850">
+                        {% for exp in expenses %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-850/30">
+                            <td class="px-4 py-3 font-semibold text-slate-800 dark:text-slate-355">{{ exp.expense_type }}</td>
+                            <td class="px-4 py-3">{{ exp.expense_date }}</td>
+                            <td class="px-4 py-3">{{ exp.vehicle.registration_number|default:"Global Fleet" }}</td>
+                            <td class="px-4 py-3 text-slate-900 dark:text-white font-medium">₹{{ exp.amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-4 py-6 text-center text-slate-400">No expenditures recorded.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

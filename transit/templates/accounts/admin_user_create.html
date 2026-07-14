@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Create User - TransitOps{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'admin_dashboard' %}" class="hover:text-blue-500 transition-colors"><i class="fa-solid fa-house"></i> Home</a>
+    <span>&rsaquo;</span>
+    <a href="{% url 'admin_user_list' %}" class="hover:text-blue-500 transition-colors">User Management</a>
+    <span>&rsaquo;</span>
+    <span class="font-semibold text-slate-700 dark:text-slate-200">Create User</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto font-sans">
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-8 shadow-xl backdrop-blur-md">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Create User Account</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Initialize a new employee credentials and grant custom privileges.</p>
+
+        <form class="space-y-5" action="{% url 'admin_user_create' %}" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="id_name" class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Username / Name</label>
+                <div class="mt-2 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-user text-sm"></i>
+                    </span>
+                    <input id="id_name" name="name" type="text" required class="block w-full rounded-xl border border-slate-700 bg-slate-850 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="e.g. Alex">
+                </div>
+            </div>
+
+            <div>
+                <label for="id_email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Email Address</label>
+                <div class="mt-2 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-envelope text-sm"></i>
+                    </span>
+                    <input id="id_email" name="email" type="email" required class="block w-full rounded-xl border border-slate-700 bg-slate-850 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="alex@gmail.com">
+                </div>
+            </div>
+
+            <div>
+                <label for="id_role" class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Select Role</label>
+                <div class="mt-2 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-user-tag text-sm"></i>
+                    </span>
+                    <select id="id_role" name="role" required class="block w-full rounded-xl border border-slate-700 bg-slate-850 py-2.5 pl-10 pr-4 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors">
+                        <option value="" disabled selected>Choose a Role</option>
+                        {% for code, label in role_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="id_phone" class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Phone Number (Optional)</label>
+                <div class="mt-2 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-phone text-sm"></i>
+                    </span>
+                    <input id="id_phone" name="phone" type="text" class="block w-full rounded-xl border border-slate-700 bg-slate-850 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="e.g. +91 9876543210">
+                </div>
+            </div>
+
+            <div>
+                <label for="id_password" class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Password</label>
+                <div class="mt-2 relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-lock text-sm"></i>
+                    </span>
+                    <input id="id_password" name="password" type="password" required class="block w-full rounded-xl border border-slate-700 bg-slate-850 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <a href="{% url 'admin_user_list' %}" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 px-4 rounded-xl border border-slate-700/80 transition-all text-sm">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-5 rounded-xl shadow-lg shadow-blue-600/20 transition-all text-sm">
+                    Save User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

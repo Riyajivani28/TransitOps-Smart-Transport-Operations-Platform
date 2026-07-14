@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TransitOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0F172A',
+                            950: '#020617',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.8s ease forwards; }
+        .glass { background: rgba(15,23,42,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .input-glow:focus { box-shadow: 0 0 15px rgba(59,130,246,0.2); }
+    </style>
+</head>
+<body class="h-full bg-slate-950 font-sans antialiased overflow-hidden">
+    <div class="flex items-center justify-center min-h-screen p-8">
+        <div class="max-w-md w-full bg-slate-900/60 glass p-8 rounded-xl animate-fade-in">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+                    <i class="fa-solid fa-truck-fast text-xl"></i>
+                </div>
+                <span class="text-2xl font-extrabold tracking-tight text-slate-300">TransitOps</span>
+            </div>
+            <h2 class="text-3xl font-extrabold mb-2 text-slate-300">Welcome Back</h2>
+            <p class="text-sm text-slate-400 mb-6">Log in to manage operations and track your fleet.</p>
+            {% if messages %}
+                <div class="space-y-2 mb-4">
+                    {% for message in messages %}
+                        <div class="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 flex items-start gap-2">
+                            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <form method="POST" action="{% url 'login' %}" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label for="id_username" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-user"></i></span>
+                        <input id="id_username" name="username" type="text" required class="block w-full pl-10 pr-3 py-2 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-500 focus:outline-none input-glow transition" placeholder="Enter username" />
+                    </div>
+                </div>
+                <div>
+                    <label for="id_password" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-lock"></i></span>
+                        <input id="id_password" name="password" type="password" required class="block w-full pl-10 pr-10 py-2 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-500 focus:outline-none input-glow transition" placeholder="••••••••" />
+                        <button type="button" id="password-toggle" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-white transition"><i class="fa-solid fa-eye" id="eye-icon"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center items-center gap-2 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:from-blue-500 hover:to-indigo-500 transition transform active:scale-[0.98]">Sign In <i class="fa-solid fa-arrow-right text-xs"></i></button>
+                </div>
+            </form>
+            <div class="text-xs text-slate-500 mt-6 text-center">&copy; 2026 TransitOps Inc. All rights reserved.</div>
+        </div>
+    </div>
+    <script>
+        const toggle = document.getElementById('password-toggle');
+        const pwdInput = document.getElementById('id_password');
+        const eye = document.getElementById('eye-icon');
+        if (toggle && pwdInput && eye) {
+            toggle.addEventListener('click', () => {
+                const type = pwdInput.type === 'password' ? 'text' : 'password';
+                pwdInput.type = type;
+                eye.classList.toggle('fa-eye');
+                eye.classList.toggle('fa-eye-slash');
+            });
+        }
+    </script>
+</body>
+</html>

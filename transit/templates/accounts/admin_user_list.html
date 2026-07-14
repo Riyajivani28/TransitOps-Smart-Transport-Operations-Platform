@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}User Management - TransitOps{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'admin_dashboard' %}" class="hover:text-blue-500 transition-colors"><i class="fa-solid fa-house"></i> Home</a>
+    <span>&rsaquo;</span>
+    <span class="font-semibold text-slate-700 dark:text-slate-200">User Management</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 font-sans">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">User Accounts & Access Control</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Activate/deactivate accounts, assign roles, change passwords, or delete credentials.</p>
+        </div>
+        <a href="{% url 'admin_user_create' %}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-xl shadow-lg transition-all text-sm">
+            <i class="fa-solid fa-user-plus"></i> Create User
+        </a>
+    </div>
+
+    <!-- Users Table Container -->
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-6 shadow-xl backdrop-blur-md">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <th class="py-3 px-4">Username</th>
+                        <th class="py-3 px-4">Email</th>
+                        <th class="py-3 px-4">Role</th>
+                        <th class="py-3 px-4">Phone</th>
+                        <th class="py-3 px-4">Password (Plain-text)</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm text-slate-600 dark:text-slate-350">
+                    {% for u in users_list %}
+                    <tr>
+                        <td class="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
+                            <div class="flex items-center gap-2">
+                                <div class="rounded-full bg-blue-500/10 p-1.5 text-blue-500">
+                                    <i class="fa-solid fa-user text-xs"></i>
+                                </div>
+                                {{ u.username }}
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4">{{ u.email }}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-400">
+                                {{ u.profile.role|default:"No Role" }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-xs font-mono">{{ u.profile.phone|default:"-" }}</td>
+                        <td class="py-3.5 px-4 font-mono text-xs text-blue-500 font-bold">{{ u.profile.raw_password|default:"-" }}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            {% if u.is_active %}
+                            <span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-400">Active</span>
+                            {% else %}
+                            <span class="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <!-- Reset Password -->
+                                <a href="{% url 'admin_user_reset_password' user_id=u.id %}" title="Reset Password" class="rounded-lg p-1.5 bg-slate-850 hover:bg-slate-800 text-blue-400 border border-slate-700/60 transition-colors">
+                                    <i class="fa-solid fa-key text-xs"></i>
+                                </a>
+
+                                <!-- Edit -->
+                                <a href="{% url 'admin_user_edit' user_id=u.id %}" title="Edit User" class="rounded-lg p-1.5 bg-slate-850 hover:bg-slate-800 text-slate-350 border border-slate-700/60 transition-colors">
+                                    <i class="fa-solid fa-pencil text-xs"></i>
+                                </a>
+
+                                <!-- Toggle Active -->
+                                <a href="{% url 'admin_user_toggle_active' user_id=u.id %}" title="Toggle Active Status" class="rounded-lg p-1.5 bg-slate-850 hover:bg-slate-800 transition-colors border border-slate-700/60 {% if u.is_active %} text-amber-500 {% else %} text-emerald-500 {% endif %}">
+                                    {% if u.is_active %}
+                                    <i class="fa-solid fa-user-slash text-xs"></i>
+                                    {% else %}
+                                    <i class="fa-solid fa-user-check text-xs"></i>
+                                    {% endif %}
+                                </a>
+
+                                <!-- Delete -->
+                                {% if u != request.user %}
+                                <a href="{% url 'admin_user_delete' user_id=u.id %}" onclick="return confirm('Are you sure you want to delete user {{ u.username }}?');" title="Delete User" class="rounded-lg p-1.5 bg-slate-850 hover:bg-red-950/20 text-red-500 border border-slate-700/60 transition-colors">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-6 text-slate-500">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

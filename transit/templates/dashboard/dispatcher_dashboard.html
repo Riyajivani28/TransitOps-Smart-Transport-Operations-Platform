@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dispatcher Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Status Badge ────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  }
+  .badge-draft    { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
+  .badge-dispatch { background: rgba(14,165,233,.12);  color: #38bdf8; border: 1px solid rgba(14,165,233,.25); }
+  .badge-ok       { background: rgba(16,185,129,.12);  color: #34d399; border: 1px solid rgba(16,185,129,.25); }
+  .badge-cancel   { background: rgba(239,68,68,.12);   color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+
+  /* ── Table Row Hover ─────────────────────────── */
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(139,92,246,.05); }
+
+  /* ── Action Buttons ──────────────────────────── */
+  .btn-dispatch { background: linear-gradient(135deg,#6d28d9,#4f46e5); color:#fff; }
+  .btn-dispatch:hover { background: linear-gradient(135deg,#7c3aed,#6366f1); transform: scale(1.03); }
+  .btn-complete { background: linear-gradient(135deg,#059669,#10b981); color:#fff; }
+  .btn-complete:hover { background: linear-gradient(135deg,#10b981,#34d399); transform: scale(1.03); }
+  .btn-cancel   { background: rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+  .btn-cancel:hover   { background: rgba(239,68,68,.25); transform: scale(1.03); }
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 9px; font-size: 10px; font-weight: 700;
+    transition: all .18s; cursor: pointer; white-space: nowrap;
+  }
+
+  /* ── Pulse dot ───────────────────────────────── */
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(1.4);} }
+  .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+  <i class="fa-solid fa-gauge-high text-violet-500"></i>
+  <span class="font-semibold text-slate-700 dark:text-slate-200">Dispatcher Operations Center</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-7 font-sans">
+
+  <!-- ═══ HEADER ══════════════════════════════════════════ -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        Dispatcher Dashboard
+      </h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Real-time dispatch lifecycle management.
+      </p>
+    </div>
+    <a href="{% url 'dispatcher_trip_create' %}"
+       id="btn-create-trip"
+       class="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg shadow-violet-500/25 transition-all text-sm">
+      <i class="fa-solid fa-plus"></i> Create Trip
+    </a>
+  </div>
+
+  <!-- ═══ ACTIVE JOURNEYS ═════════════════════════════════ -->
+  <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-6 shadow-xl backdrop-blur-md">
+    <div class="flex items-center gap-3 mb-5">
+      <span class="relative flex h-2.5 w-2.5">
+        <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
+      </span>
+      <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Active Journeys (Dispatched)</h2>
+      <span class="badge badge-dispatch">{{ active_trips_count }} On Trip</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <th class="py-2.5 px-3">Trip #</th>
+            <th class="py-2.5 px-3">Route</th>
+            <th class="py-2.5 px-3">Vehicle</th>
+            <th class="py-2.5 px-3">Driver</th>
+            <th class="py-2.5 px-3">Cargo</th>
+            <th class="py-2.5 px-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/70 text-xs text-slate-700 dark:text-slate-300">
+          {% for trip in dispatched_trips %}
+          <tr>
+            <td class="py-3 px-3 font-extrabold text-slate-900 dark:text-white">{{ trip.trip_number }}</td>
+            <td class="py-3 px-3">
+              <span class="font-medium">{{ trip.source }}</span>
+              <i class="fa-solid fa-arrow-right-long text-slate-400 mx-1 text-[10px]"></i>
+              <span class="font-medium">{{ trip.destination }}</span>
+            </td>
+            <td class="py-3 px-3">
+              <span class="font-semibold text-slate-800 dark:text-slate-200 block">{{ trip.vehicle.registration_number }}</span>
+              <span class="text-[10px] text-slate-400">{{ trip.vehicle.name }}</span>
+            </td>
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2">
+                <div class="h-7 w-7 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-[10px] font-bold shrink-0">
+                  {{ trip.driver.name|slice:":1" }}
+                </div>
+                <span class="font-medium">{{ trip.driver.name }}</span>
+              </div>
+            </td>
+            <td class="py-3 px-3 font-semibold">{{ trip.cargo_weight }} kg</td>
+            <td class="py-3 px-3 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{% url 'trip_complete_dispatcher' pk=trip.pk %}"
+                   id="btn-complete-{{ trip.pk }}"
+                   class="action-btn btn-complete shadow-sm shadow-emerald-500/20">
+                  <i class="fa-solid fa-flag-checkered"></i> Complete Trip
+                </a>
+                <a href="{% url 'trip_status_change' pk=trip.pk status='Cancelled' %}"
+                   id="btn-cancel-active-{{ trip.pk }}"
+                   onclick="return confirm('Cancel trip {{ trip.trip_number }}? Vehicle and Driver will be freed.');"
+                   class="action-btn btn-cancel">
+                  <i class="fa-solid fa-ban"></i> Cancel Trip
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="py-10 text-center text-slate-500">
+              <i class="fa-solid fa-truck-fast text-3xl text-slate-300 dark:text-slate-700 mb-2 block"></i>
+              No active journeys on the road right now.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PENDING DISPATCH ════════════════════════════════ -->
+  <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-6 shadow-xl backdrop-blur-md">
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
+        <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Pending Dispatch (Draft)</h2>
+        <span class="badge badge-draft">{{ draft_trips }} Draft</span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <th class="py-2.5 px-3">Trip #</th>
+            <th class="py-2.5 px-3">Route</th>
+            <th class="py-2.5 px-3">Vehicle</th>
+            <th class="py-2.5 px-3">Driver</th>
+            <th class="py-2.5 px-3">Cargo</th>
+            <th class="py-2.5 px-3">Validation</th>
+            <th class="py-2.5 px-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/70 text-xs text-slate-700 dark:text-slate-300">
+          {% for trip in draft_trips_list %}
+          <tr>
+            <td class="py-3 px-3 font-extrabold text-slate-900 dark:text-white">{{ trip.trip_number }}</td>
+            <td class="py-3 px-3">
+              <span class="font-medium">{{ trip.source }}</span>
+              <i class="fa-solid fa-arrow-right-long text-slate-400 mx-1 text-[10px]"></i>
+              <span class="font-medium">{{ trip.destination }}</span>
+            </td>
+            <td class="py-3 px-3">
+              <span class="font-semibold block {% if trip.vehicle.status != 'Available' %}text-rose-400{% else %}text-slate-800 dark:text-slate-200{% endif %}">
+                {{ trip.vehicle.registration_number }}
+              </span>
+              <span class="text-[10px]">
+                {% if trip.vehicle.status == 'Available' %}<i class="fa-solid fa-circle-check text-emerald-400"></i> Available
+                {% else %}<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> {{ trip.vehicle.status }}{% endif %}
+              </span>
+            </td>
+            <td class="py-3 px-3">
+              <span class="font-semibold block {% if trip.driver.status != 'Available' %}text-rose-400{% else %}text-slate-800 dark:text-slate-200{% endif %}">
+                {{ trip.driver.name }}
+              </span>
+              <span class="text-[10px]">
+                {% if trip.driver.status == 'Available' %}<i class="fa-solid fa-circle-check text-emerald-400"></i> Available
+                {% else %}<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> {{ trip.driver.status }}{% endif %}
+              </span>
+            </td>
+            <td class="py-3 px-3 font-semibold">{{ trip.cargo_weight }} kg</td>
+            <td class="py-3 px-3">
+              {% if trip.vehicle.status == 'Available' and trip.driver.status == 'Available' %}
+                <span class="badge badge-ok"><i class="fa-solid fa-circle-check"></i> Ready</span>
+              {% else %}
+                <span class="badge badge-cancel"><i class="fa-solid fa-triangle-exclamation"></i> Blocked</span>
+              {% endif %}
+            </td>
+            <td class="py-3 px-3 text-right">
+              <div class="flex items-center justify-end gap-2">
+                {% if trip.vehicle.status == 'Available' and trip.driver.status == 'Available' %}
+                  <a href="{% url 'trip_status_change' pk=trip.pk status='Dispatched' %}"
+                     id="btn-dispatch-{{ trip.pk }}"
+                     class="action-btn btn-dispatch shadow-sm shadow-violet-500/20">
+                    <i class="fa-solid fa-truck-arrow-right"></i> Dispatch Trip
+                  </a>
+                {% else %}
+                  <button disabled title="Vehicle or Driver is unavailable"
+                          class="action-btn opacity-40 cursor-not-allowed bg-slate-200 dark:bg-slate-800 text-slate-500">
+                    <i class="fa-solid fa-lock"></i> Blocked
+                  </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="py-10 text-center text-slate-500">
+              <i class="fa-solid fa-inbox text-3xl text-slate-300 dark:text-slate-700 mb-2 block"></i>
+              No pending trips. <a href="{% url 'dispatcher_trip_create' %}" class="text-violet-400 font-bold hover:underline">Create one now →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

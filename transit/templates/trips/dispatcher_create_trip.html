@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Trip — Dispatcher{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Step progress bar */
+  .step-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    transition: all .3s;
+    position: relative; z-index: 1;
+  }
+  .step-dot.active   { background: linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; box-shadow: 0 0 0 4px rgba(124,58,237,.25); }
+  .step-dot.complete { background: #10b981; color:#fff; }
+  .step-dot.pending  { background: rgba(148,163,184,.15); color:#64748b; border: 2px solid rgba(148,163,184,.25); }
+  .step-line {
+    flex: 1; height: 2px;
+    background: linear-gradient(90deg, rgba(139,92,246,.3) 0%, rgba(139,92,246,.08) 100%);
+    margin: 0 4px;
+  }
+
+  /* Input focus glow */
+  .form-input:focus { box-shadow: 0 0 0 3px rgba(139,92,246,.2); }
+
+  /* Floating card pulse on form validation */
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+  .shake { animation: shake .4s ease; }
+
+  /* Vehicle capacity badge */
+  #capacity-badge { transition: all .3s; }
+
+  /* Submit button hover */
+  #btn-submit { transition: transform .2s, box-shadow .2s; }
+  #btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(124,58,237,.35); }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+  <a href="{% url 'dispatcher_dashboard' %}" class="hover:text-violet-400 transition-colors">
+    <i class="fa-solid fa-gauge-high"></i> Dispatcher Dashboard
+  </a>
+  <i class="fa-solid fa-chevron-right text-[9px]"></i>
+  <span class="font-semibold text-slate-700 dark:text-slate-200">Create New Trip</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto font-sans">
+
+  <!-- Page Title -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+      <i class="fa-solid fa-plus-circle text-violet-500 mr-2"></i>Create Trip
+    </h1>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+      Fill in the 5 required fields — trip number and timestamp are auto-generated.
+    </p>
+  </div>
+
+  <!-- Step Progress (visual only) -->
+  <div class="flex items-center mb-7 px-2">
+    <div class="flex flex-col items-center gap-1">
+      <div class="step-dot active" id="step1">1</div>
+      <span class="text-[9px] font-bold text-violet-400 uppercase tracking-wider">Route</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="flex flex-col items-center gap-1">
+      <div class="step-dot pending" id="step2">2</div>
+      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Vehicle</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="flex flex-col items-center gap-1">
+      <div class="step-dot pending" id="step3">3</div>
+      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Driver</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="flex flex-col items-center gap-1">
+      <div class="step-dot pending" id="step4">4</div>
+      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Cargo</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="flex flex-col items-center gap-1">
+      <div class="step-dot pending" id="step5">5</div>
+      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Dispatch</span>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-2xl p-6 md:p-8" id="form-card">
+
+    {% if form.non_field_errors %}
+    <div class="mb-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
+      <p class="text-xs font-bold text-rose-400 mb-1"><i class="fa-solid fa-triangle-exclamation"></i> Validation Error</p>
+      {% for err in form.non_field_errors %}
+        <p class="text-xs text-rose-300">{{ err }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" id="create-trip-form" class="space-y-5" novalidate>
+      {% csrf_token %}
+
+      <!-- ── Row 1: Source + Destination ─────────────────── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <!-- Source -->
+        <div>
+          <label for="id_d_source" class="block text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+            <i class="fa-solid fa-location-dot text-violet-400 mr-1"></i> Source
+          </label>
+          {{ form.source }}
+          {% if form.source.errors %}
+            <p class="text-[11px] text-rose-400 mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> {{ form.source.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Destination -->
+        <div>
+          <label for="id_d_destination" class="block text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+            <i class="fa-solid fa-flag-checkered text-sky-400 mr-1"></i> Destination
+          </label>
+          {{ form.destination }}
+          {% if form.destination.errors %}
+            <p class="text-[11px] text-rose-400 mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> {{ form.destination.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── Row 2: Vehicle ──────────────────────────────── -->
+      <div>
+        <label for="id_d_vehicle" class="block text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+          <i class="fa-solid fa-truck text-amber-400 mr-1"></i> Available Vehicle
+        </label>
+        {{ form.vehicle }}
+        <!-- Dynamic capacity hint -->
+        <div id="capacity-badge" class="mt-2 hidden">
+          <span class="text-[11px] text-slate-400">Max Load Capacity: <span id="cap-val" class="font-bold text-amber-400"></span> kg</span>
+        </div>
+        {% if form.vehicle.errors %}
+          <p class="text-[11px] text-rose-400 mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> {{ form.vehicle.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- ── Row 3: Driver ───────────────────────────────── -->
+      <div>
+        <label for="id_d_driver" class="block text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+          <i class="fa-solid fa-user-tie text-indigo-400 mr-1"></i> Available Driver
+        </label>
+        {{ form.driver }}
+        {% if form.driver.errors %}
+          <p class="text-[11px] text-rose-400 mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> {{ form.driver.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- ── Row 4: Cargo Weight ─────────────────────────── -->
+      <div>
+        <label for="id_d_cargo_weight" class="block text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+          <i class="fa-solid fa-weight-hanging text-orange-400 mr-1"></i> Cargo Weight (kg)
+        </label>
+        <div class="relative">
+          {{ form.cargo_weight }}
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold">kg</span>
+        </div>
+        <!-- Overload warning -->
+        <div id="overload-warning" class="hidden mt-2 rounded-lg bg-rose-500/10 border border-rose-500/25 px-3 py-2">
+          <p class="text-[11px] text-rose-400 font-semibold">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Cargo weight exceeds vehicle capacity!
+          </p>
+        </div>
+        {% if form.cargo_weight.errors %}
+          <p class="text-[11px] text-rose-400 mt-1.5 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> {{ form.cargo_weight.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+
+      <!-- ── Validation Summary ──────────────────────────── -->
+      <div id="validation-panel" class="hidden rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
+        <p class="text-xs font-bold text-emerald-400 mb-1"><i class="fa-solid fa-circle-check"></i> Ready to Save</p>
+        <p class="text-[11px] text-emerald-300">All fields are valid. Click <strong>Save & Go to Dashboard</strong> to create the trip in Draft status — then dispatch it from the dashboard.</p>
+      </div>
+
+      <!-- ── Action Buttons ──────────────────────────────── -->
+      <div class="flex items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 pt-5 mt-2">
+        <a href="{% url 'dispatcher_dashboard' %}"
+           class="rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-850 px-5 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 transition-all">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Back
+        </a>
+        <button type="submit"
+                id="btn-submit"
+                class="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 px-7 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-violet-500/25 tracking-wide">
+          <i class="fa-solid fa-floppy-disk mr-1"></i> Save Trip &amp; Go to Dashboard
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script id="vehicle-capacities-data" type="application/json">
+  {{ vehicle_capacities_json|safe }}
+</script>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const vehicleCapacities = JSON.parse(document.getElementById('vehicle-capacities-data').textContent);
+
+  const vehicleSelect  = document.getElementById('id_d_vehicle');
+  const driverSelect   = document.getElementById('id_d_driver');
+  const sourceInput    = document.getElementById('id_d_source');
+  const destInput      = document.getElementById('id_d_destination');
+  const cargoInput     = document.getElementById('id_d_cargo_weight');
+  const capBadge       = document.getElementById('capacity-badge');
+  const capVal         = document.getElementById('cap-val');
+  const overloadWarn   = document.getElementById('overload-warning');
+  const validPanel     = document.getElementById('validation-panel');
+  const submitBtn      = document.getElementById('btn-submit');
+
+  // Step dots
+  const steps = [
+    document.getElementById('step1'),
+    document.getElementById('step2'),
+    document.getElementById('step3'),
+    document.getElementById('step4'),
+    document.getElementById('step5'),
+  ];
+
+  function updateSteps () {
+    const filled = [
+      sourceInput.value.trim() && destInput.value.trim(),
+      vehicleSelect.value,
+      driverSelect.value,
+      cargoInput.value,
+    ];
+    filled.forEach((ok, i) => {
+      steps[i].classList.remove('active','complete','pending');
+      steps[i].classList.add(ok ? 'complete' : 'pending');
+      steps[i].innerHTML = ok ? '<i class="fa-solid fa-check text-[10px]"></i>' : (i + 1);
+    });
+    // Last step (submit) lights up only when all done
+    const allOk = filled.every(Boolean);
+    steps[4].classList.remove('active','complete','pending');
+    steps[4].classList.add(allOk ? 'active' : 'pending');
+    steps[4].innerHTML = allOk ? '<i class="fa-solid fa-truck-arrow-right text-[10px]"></i>' : '5';
+
+    validPanel.classList.toggle('hidden', !allOk);
+  }
+
+  // Vehicle selected → show capacity
+  function onVehicleChange () {
+    const pk = vehicleSelect.value;
+    if (pk && vehicleCapacities[pk] !== undefined) {
+      capVal.textContent = vehicleCapacities[pk];
+      capBadge.classList.remove('hidden');
+    } else {
+      capBadge.classList.add('hidden');
+    }
+    checkOverload();
+    updateSteps();
+  }
+
+  // Check cargo vs capacity
+  function checkOverload () {
+    const pk  = vehicleSelect.value;
+    const cap = vehicleCapacities[pk];
+    const kg  = parseFloat(cargoInput.value);
+    if (pk && cap !== undefined && !isNaN(kg) && kg > cap) {
+      overloadWarn.classList.remove('hidden');
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50','cursor-not-allowed');
+    } else {
+      overloadWarn.classList.add('hidden');
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-50','cursor-not-allowed');
+    }
+  }
+
+  vehicleSelect.addEventListener('change', onVehicleChange);
+  cargoInput.addEventListener('input', () => { checkOverload(); updateSteps(); });
+  sourceInput.addEventListener('input', updateSteps);
+  destInput.addEventListener('input', updateSteps);
+  driverSelect.addEventListener('change', updateSteps);
+
+  // Init
+  onVehicleChange();
+  updateSteps();
+});
+</script>
+{% endblock %}
+{% endblock %}

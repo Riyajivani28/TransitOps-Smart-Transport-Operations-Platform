@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+        <nav class="flex text-xs text-slate-500 dark:text-slate-400 font-medium" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <span class="inline-flex items-center gap-1.5 text-blue-500">
+                        <i class="fa-solid fa-house"></i> Home
+                    </span>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chevron-right text-[10px] mx-1 text-slate-400"></i>
+                        <span class="text-slate-400 dark:text-slate-500">Dashboard</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mt-1">Fleet Operations Hub</h2>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Actions Panel -->
+<div class="mb-6 rounded-2xl glass-card p-4 md:p-6 shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-base font-bold text-slate-800 dark:text-white">Quick Actions</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Instantly register assets, dispatch vehicles, or report operations.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'trip_create' %}" class="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-blue-500 transition-all">
+                <i class="fa-solid fa-circle-plus"></i> Dispatch Trip
+            </a>
+            <a href="{% url 'vehicle_create' %}" class="flex items-center gap-1.5 rounded-xl bg-slate-850 border border-slate-700 bg-slate-800/40 text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all">
+                <i class="fa-solid fa-truck"></i> Add Vehicle
+            </a>
+            <a href="{% url 'driver_create' %}" class="flex items-center gap-1.5 rounded-xl bg-slate-850 border border-slate-700 bg-slate-800/40 text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all">
+                <i class="fa-solid fa-id-card"></i> Add Driver
+            </a>
+            <a href="{% url 'maintenance_create' %}" class="flex items-center gap-1.5 rounded-xl bg-slate-850 border border-slate-700 bg-slate-800/40 text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all">
+                <i class="fa-solid fa-screwdriver-wrench"></i> Log Maintenance
+            </a>
+            <a href="{% url 'fuel_create' %}" class="flex items-center gap-1.5 rounded-xl bg-slate-850 border border-slate-700 bg-slate-800/40 text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all">
+                <i class="fa-solid fa-gas-pump"></i> Log Fuel
+            </a>
+            <a href="{% url 'expense_create' %}" class="flex items-center gap-1.5 rounded-xl bg-slate-850 border border-slate-700 bg-slate-800/40 text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all">
+                <i class="fa-solid fa-wallet"></i> Log Expense
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 mb-8">
+    
+    <!-- Available Vehicles -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Available Vehicles</span>
+            <div class="rounded-lg bg-emerald-500/10 p-2 text-emerald-500">
+                <i class="fa-solid fa-circle-check text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ available_vehicles }}</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-1 rounded-full bg-emerald-500" style="width: 70%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicles on Trip -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Vehicles On Trip</span>
+            <div class="rounded-lg bg-blue-500/10 p-2 text-blue-500">
+                <i class="fa-solid fa-truck-moving text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ vehicles_on_trip }}</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-1 rounded-full bg-blue-500" style="width: 50%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicles in Shop -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">In Maintenance</span>
+            <div class="rounded-lg bg-amber-500/10 p-2 text-amber-500">
+                <i class="fa-solid fa-screwdriver-wrench text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ vehicles_in_shop }}</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-1 rounded-full bg-amber-500" style="width: 25%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Drivers -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Drivers Available</span>
+            <div class="rounded-lg bg-indigo-500/10 p-2 text-indigo-500">
+                <i class="fa-solid fa-id-badge text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ drivers_available }}</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-1 rounded-full bg-indigo-500" style="width: 80%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Trips -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Active Trips</span>
+            <div class="rounded-lg bg-teal-500/10 p-2 text-teal-500">
+                <i class="fa-solid fa-route text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ active_trips }}</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-1 rounded-full bg-teal-500" style="width: 40%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fleet Utilization -->
+    <div class="group relative rounded-2xl glass-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Fleet Utilization</span>
+            <div class="rounded-lg bg-purple-500/10 p-2 text-purple-500">
+                <i class="fa-solid fa-percent text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white">{{ fleet_utilization }}%</h3>
+            <div class="mt-2 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-800">
+                <div id="fleet-utilization-bar" class="h-1 rounded-full bg-purple-500" data-utilization="{{ fleet_utilization }}"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Charts Grid -->
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
+    <!-- Fleet Allocation & Driver Status -->
+    <div class="rounded-2xl glass-card p-6 shadow-sm">
+        <h3 class="text-base font-bold text-slate-800 dark:text-white mb-4">Fleet & Driver Status Breakdown</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <canvas id="vehicleStatusChart" class="max-h-56"></canvas>
+            </div>
+            <div>
+                <canvas id="driverStatusChart" class="max-h-56"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational Expenses vs Monthly Trips -->
+    <div class="rounded-2xl glass-card p-6 shadow-sm">
+        <h3 class="text-base font-bold text-slate-800 dark:text-white mb-4">Expense Categories Analysis</h3>
+        <canvas id="expenseChart" class="max-h-56"></canvas>
+    </div>
+</div>
+
+<!-- Details Tables Grid -->
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <!-- Recent Trips -->
+    <div class="rounded-2xl glass-card p-6 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-slate-800 dark:text-white">Recent Trips</h3>
+            <a href="{% url 'trip_list' %}" class="text-xs font-semibold text-blue-500 hover:underline">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase">
+                        <th class="py-2.5">Trip Number</th>
+                        <th class="py-2.5">Route</th>
+                        <th class="py-2.5">Vehicle</th>
+                        <th class="py-2.5">Driver</th>
+                        <th class="py-2.5">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    {% for trip in recent_trips %}
+                    <tr>
+                        <td class="py-3 font-semibold text-slate-800 dark:text-slate-200">{{ trip.trip_number }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400">{{ trip.source }} &rarr; {{ trip.destination }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400">{{ trip.vehicle.name }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400">{{ trip.driver.name }}</td>
+                        <td class="py-3">
+                            <span class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold leading-5
+                                {% if trip.status == 'Dispatched' %} bg-blue-500/10 text-blue-500
+                                {% elif trip.status == 'Completed' %} bg-green-500/10 text-green-500
+                                {% elif trip.status == 'Cancelled' %} bg-red-500/10 text-red-500
+                                {% else %} bg-slate-500/10 text-slate-400 {% endif %}">
+                                {{ trip.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-4 text-center text-slate-400">No recent trips found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Expenses -->
+    <div class="rounded-2xl glass-card p-6 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-slate-800 dark:text-white">Recent Expenses</h3>
+            <a href="{% url 'expense_list' %}" class="text-xs font-semibold text-blue-500 hover:underline">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase">
+                        <th class="py-2.5">Category</th>
+                        <th class="py-2.5">Vehicle</th>
+                        <th class="py-2.5">Date</th>
+                        <th class="py-2.5">Remarks</th>
+                        <th class="py-2.5">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    {% for exp in recent_expenses %}
+                    <tr>
+                        <td class="py-3 font-semibold text-slate-800 dark:text-slate-200">{{ exp.expense_type }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400">{{ exp.vehicle.registration_number|default:"General" }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400">{{ exp.expense_date|date:"M d, Y" }}</td>
+                        <td class="py-3 text-slate-500 dark:text-slate-400 max-w-[120px] truncate">{{ exp.remarks }}</td>
+                        <td class="py-3 font-bold text-slate-800 dark:text-slate-200">${{ exp.amount }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-4 text-center text-slate-400">No expenses recorded.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 1. Vehicle Allocation Chart
+    const vehicleData = JSON.parse('{{ vehicle_status_json|safe }}');
+    const ctxVeh = document.getElementById('vehicleStatusChart').getContext('2d');
+    new Chart(ctxVeh, {
+        type: 'doughnut',
+        data: {
+            labels: vehicleData.labels,
+            datasets: [{
+                data: vehicleData.data,
+                backgroundColor: ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+            }
+        }
+    });
+
+    // 2. Driver Allocation Chart
+    const driverData = JSON.parse('{{ driver_status_json|safe }}');
+    const ctxDrv = document.getElementById('driverStatusChart').getContext('2d');
+    new Chart(ctxDrv, {
+        type: 'doughnut',
+        data: {
+            labels: driverData.labels,
+            datasets: [{
+                data: driverData.data,
+                backgroundColor: ['#22C55E', '#3B82F6', '#64748B', '#EF4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+            }
+        }
+    });
+
+    // 3. Expense Analysis Chart
+    const expData = JSON.parse('{{ expense_chart_json|safe }}');
+    const ctxExp = document.getElementById('expenseChart').getContext('2d');
+    new Chart(ctxExp, {
+        type: 'bar',
+        data: {
+            labels: expData.labels,
+            datasets: [{
+                label: 'Expenses ($)',
+                data: expData.data,
+                backgroundColor: '#3B82F6',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.08)' } }
+            }
+        }
+    });
+
+    // Set Fleet Utilization bar width
+    const utilBar = document.getElementById('fleet-utilization-bar');
+    if (utilBar) {
+        utilBar.style.width = utilBar.getAttribute('data-utilization') + '%';
+    }
+</script>
+{% endblock %}

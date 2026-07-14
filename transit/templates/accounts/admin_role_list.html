@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Role Management - TransitOps{% endblock %}
+
+{% block breadcrumbs %}
+<div class="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'admin_dashboard' %}" class="hover:text-blue-500 transition-colors"><i class="fa-solid fa-house"></i> Home</a>
+    <span>&rsaquo;</span>
+    <span class="font-semibold text-slate-700 dark:text-slate-200">Role Management</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 font-sans">
+    <div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Role Assignment & System Privileges</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Define user access permissions by mapping profiles to dedicated system roles.</p>
+    </div>
+
+    <!-- Roles Table Container -->
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-6 shadow-xl backdrop-blur-md">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <th class="py-3 px-4">Username</th>
+                        <th class="py-3 px-4">Current Role</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Assign New Role</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm text-slate-600 dark:text-slate-350">
+                    {% for u in users_list %}
+                    <tr>
+                        <td class="py-4 px-4 font-semibold text-slate-900 dark:text-white">
+                            <div class="flex items-center gap-2">
+                                <div class="rounded-full bg-blue-500/10 p-1.5 text-blue-500">
+                                    <i class="fa-solid fa-user text-xs"></i>
+                                </div>
+                                {{ u.username }}
+                            </div>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-400">
+                                {{ u.profile.role|default:"No Role" }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            {% if u.is_active %}
+                            <span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-400">Active</span>
+                            {% else %}
+                            <span class="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <form action="{% url 'admin_role_list' %}" method="POST" class="inline-flex items-center gap-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <select name="role" required class="rounded-xl border border-slate-700 bg-slate-850 px-3 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors">
+                                    <option value="" disabled>Select Role</option>
+                                    {% for code, label in role_choices %}
+                                        <option value="{{ code }}" {% if u.profile.role == code %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-1.5 px-3 rounded-xl transition-all shadow-md">
+                                    Update
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-6 text-slate-500">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

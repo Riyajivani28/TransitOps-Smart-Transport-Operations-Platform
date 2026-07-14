@@ -1,0 +1,111 @@
+<header class="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white/80 px-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 md:px-6">
+    <!-- Left Section: Toggle & Title -->
+    <div class="flex items-center gap-3">
+        <button id="sidebar-toggle" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 lg:hidden">
+            <i class="fa-solid fa-bars-staggered text-xl"></i>
+        </button>
+        <div class="hidden sm:block">
+            <span class="text-xs font-semibold uppercase tracking-wider text-blue-500">TransitOps Hub</span>
+            <h1 class="text-lg font-bold text-slate-800 dark:text-white leading-none">Smart Transport Platform</h1>
+        </div>
+    </div>
+
+    <!-- Right Section: Tools, Dark Mode, Profile -->
+    <div class="flex items-center gap-4">
+        <!-- Theme Switcher -->
+        <button id="theme-toggle" class="rounded-lg p-2.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+            <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+            <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+        </button>
+
+        <!-- Vertical Divider -->
+        <div class="h-6 w-px bg-slate-200 dark:bg-slate-800"></div>
+
+        <!-- User Profile Dropdown -->
+        <div class="relative" id="profile-dropdown-container">
+            <button id="profile-dropdown-btn" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {% if user.profile.photo %}
+                    <img src="{{ user.profile.photo.url }}" alt="{{ user.username }}" class="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-800">
+                {% else %}
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-sm uppercase">
+                        {{ user.username|slice:":2" }}
+                    </div>
+                {% endif %}
+                <div class="hidden text-left md:block">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-white leading-none">{{ user.username }}</p>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">{{ user.profile.role|default:"Fleet Member" }}</span>
+                </div>
+                <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden md:block ml-1"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="profile-dropdown-menu" class="absolute right-0 mt-2 w-52 origin-top-right rounded-xl border border-slate-200 bg-white p-1 shadow-lg ring-1 ring-black ring-opacity-5 transition-all scale-95 opacity-0 pointer-events-none dark:border-slate-800 dark:bg-slate-850">
+                <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 md:hidden">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-white leading-none">{{ user.username }}</p>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">{{ user.profile.role }}</span>
+                </div>
+                {% if request.user.profile.role != 'Financial Analyst' %}
+                <a href="{% url 'profile' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                    <i class="fa-regular fa-user text-slate-400"></i> My Profile
+                </a>
+                {% endif %}
+                {% if request.user.profile.role != 'Dispatcher' and request.user.profile.role != 'Safety Officer' and request.user.profile.role != 'Financial Analyst' %}
+                <a href="{% url 'settings' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-sliders text-slate-400"></i> Settings
+                </a>
+                {% endif %}
+                <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
+                <a href="{% url 'logout' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Profile Dropdown Toggle
+    const profileBtn = document.getElementById('profile-dropdown-btn');
+    const profileMenu = document.getElementById('profile-dropdown-menu');
+    
+    if (profileBtn && profileMenu) {
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !profileMenu.classList.contains('pointer-events-none');
+            if (isOpen) {
+                profileMenu.classList.add('pointer-events-none', 'scale-95', 'opacity-0');
+            } else {
+                profileMenu.classList.remove('pointer-events-none', 'scale-95', 'opacity-0');
+            }
+        });
+        
+        document.addEventListener('click', () => {
+            profileMenu.classList.add('pointer-events-none', 'scale-95', 'opacity-0');
+        });
+    }
+
+    // Theme Toggle Handler
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('dark-mode', 'false');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('dark-mode', 'true');
+            }
+        });
+    }
+
+    // Mobile Sidebar Toggle
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar-container');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('-translate-x-full');
+        });
+    }
+</script>
